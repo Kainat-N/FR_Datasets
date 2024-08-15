@@ -177,7 +177,6 @@ Too big to put it in supplementary materials. Instead, we put our training logs 
 
 ## Future Work
 
-- Implement PFC for training models on WebFace42M with 1×GPU.
 - Conduct experiments on Masked Face Recognition (MFR)<sup>1</sup>.
 - Fix bugs in the test files once for all.
 
