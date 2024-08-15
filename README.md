@@ -169,11 +169,11 @@ Too big to put it in supplementary materials. Instead, we put our training logs 
 
 | Datasets   | Backbone  | LFW   | CFP-FP | AgeDB-30 | IJB-B(1e-4) | IJB-B(1e-4) | log                                             |
 |:-----------|:----------|:------|:-------|:---------|:------------|:------------|:------------------------------------------------|
-| MS1MV3     | ResNet100 | 99.80 | 98.53  | 98.12    | 95.03       | 96.41       | [click me](./Output/ms1mv3_epoch5_r100.log)     |
-| WebFace4M  | ResNet100 | 99.65 | 98.63  | 97.57    | 94.36       | 96.18       | [click me](./Output/WebFace4M_epoch5_r100.log)  |
-| WebFace8M  | ResNet100 | 99.85 | 99.24  | 97.90    | 95.58       | 97.09       | [click me](./Output/WebFace8M_epoch5_r100.log)  |
-| WebFace12M | ResNet50  | 99.80 | 99.09  | 97.92    | 95.25       | 96.85       | [click me](./Output/WebFace12M_epoch5_r50.log)  |
-| WebFace12M | ResNet100 | 99.83 | 99.17  | 98.02    | 95.68       | 97.20       | [click me](./Output/WebFace12M_epoch5_r100.log) |
+| MS1MV3     | ResNet100 | 99.80 | 98.53  | 98.12    | 95.03       | 96.41       | [click me](./Output/ms1mv3_epoch5_r100.txt)     |
+| WebFace4M  | ResNet100 | 99.65 | 98.63  | 97.57    | 94.36       | 96.18       | [click me](./Output/WebFace4M_epoch5_r100.txt)  |
+| WebFace8M  | ResNet100 | 99.85 | 99.24  | 97.90    | 95.58       | 97.09       | [click me](./Output/WebFace8M_epoch5_r100.txt)  |
+| WebFace12M | ResNet50  | 99.80 | 99.09  | 97.92    | 95.25       | 96.85       | [click me](./Output/WebFace12M_epoch5_r50.txt)  |
+| WebFace12M | ResNet100 | 99.83 | 99.17  | 98.02    | 95.68       | 97.20       | [click me](./Output/WebFace12M_epoch5_r100.txt) |
 
 ## Future Work
 
