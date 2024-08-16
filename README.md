@@ -17,7 +17,7 @@ We would like to express our sincere thanks to InsightFace<sup>1</sup>. MHLR is 
 ## Some differences corresponding to arcface_pytorch
 
 - Arface_pytorch needs to install MXNet in order to read datasets from ".rec" files. The way to install the environment is in the document [`./utils/INSTALL_MXNET.md`](./utils/INSTALL_MXNET.md). However, it took us a long time to configure the developing environment. Thus, for simplicity and reproducibility, we converted the ".rec" files into ".jpg" images, though the huge amount of images will lead to that too many small files on the hard disk. In addition, the dataset WebFace42M contains ".jpg" images instead of ".rec" files. Therefore, we select ".jpg" images as our training data.
-- The implementation of arcface_pytorch aims at distributed training, while MHLR aims at single GPU training. Therefore, we mainly revised the multi-nodes with multi-GPUs code in arcface_pytorch to single GPU version in MHLR. However, Partial FC (PFC) have not successfully modified yet. Hence, training models on WebFace42M is our future work, since the 1xGPU memory space without PFC is not enough for it.
+- The implementation of arcface_pytorch aims at distributed training, while MHLR aims at single GPU training. Therefore, we mainly revised the multi-nodes with multi-GPUs code in arcface_pytorch to single GPU version in MHLR.
 
 ## Requirements
 
