@@ -5,15 +5,123 @@ import warnings
 import pandas as pd
 import numpy as np
 
-class MHLR(_LRScheduler):
+# class MHLR(_LRScheduler):
+#     def __init__(self, optimizer, total_steps, alpha=0.001, beta=0.001, lambd=4e-5, tau=0.04, delta=2, last_epoch=-1):
+#         self.alpha = alpha
+#         self.beta = beta
+#         self.toler = int(total_steps*tau)
+#         self.thres = lambd
+#         self.decay = delta
+#         self.weight = 1
+#         self.count = 0
+        
+#         self.L_t = 0
+#         self.L_t_1 = 0
+#         self.D_t = 0
+#         self.D_t_1 = 0
+#         self.D_EMA_t = 0
+#         self.D_EMA_t_1 = 0
+#         # self.k1 = np.ones(self.m)
+#         # self.k2 = np.ones(self.m)
+#         # self.k2[int(self.m/2):] = -1
+#         # self.ss = np.zeros(self.m)
+#         # self.avg = []
+#         # self.diff = []
+#         # self.count = 0
+#         # self.weight = 1
+#         # self.w_count = 0
+#         super().__init__(optimizer, last_epoch=last_epoch)
+    
+#     def my_step(self, loss):
+#         # print(self.last_epoch)
+#         # print(self._step_count)
+#         super().step()
+        
+#         t = self.last_epoch - 1
+#         if t < 1:
+#             self.L_t_1 = loss
+#             return
+        
+#         self.L_t = loss
+#         if t < 2:
+#             self.D_t = self.alpha*(self.L_t_1 - self.L_t)
+#             self.D_EMA_t = self.D_t
+#         else:
+#             self.D_t = (1 - self.alpha)*self.D_t_1 + self.alpha*(self.L_t_1 - self.L_t)
+#             self.D_EMA_t = self.beta*self.D_t + (1-self.beta)*self.D_EMA_t_1
+        
+#         if self.D_EMA_t < self.thres:
+#             if self.count < self.toler:
+#                 self.weight = 1
+#                 self.count += 1
+#             else:
+#                 self.weight = 1/self.decay
+#                 self.count = 0
+#         else:
+#             self.weight = 1
+#             self.count = 0
+                
+#         self.L_t_1 = self.L_t
+#         self.D_t_1 = self.D_t
+#         self.D_EMA_t_1 = self.D_EMA_t
+        
+#         # return self.weight
+#         # if i < self.m:
+#         #     self.ss[i] = loss
+#         #     return
+        
+#         # self.ss[:-1] = self.ss[1:]
+#         # self.ss[-1] = loss
+#         # self.avg.append(np.sum(self.ss*self.k1)/self.m)
+        
+#         # if i < 2*self.m:
+#         #     return
+        
+#         # s_avg = self.avg[(i-2*self.m):(i-self.m)]
+#         # self.diff.append(np.sum(s_avg*self.k2)/self.m)
+        
+#         # if self.diff[-1] < 0.06:
+#         #     self.count += 1
+            
+#         #     if self.count > 2*self.m:
+#         #         self.weight = 0.5
+#         #         self.count = 0
+#         #         self.w_count += 1
+#         #     else:
+#         #         self.weight = 1
+                
+#         #     if self.w_count > 2:
+#         #         self.weight = 4
+#         #         self.w_count = 0
+#         # else:
+#         #     self.weight = 1
+#         #     self.count = 0
+#         #     self.w_count = 0
+        
+        
+        
+        
+        
+        
+    
+#     def get_lr(self):
+#         # if self.last_epoch <= 2*self.m:
+#         #     return [0, 0]
+        
+#         # return [self.weight, self.weight]
+        
+#         return [(group["lr"]* self.weight) for group in self.optimizer.param_groups]
+        
+class MHLR1(_LRScheduler):
     def __init__(self, optimizer, total_steps, alpha=0.001, beta=0.001, lambd=5e-5, tau=0.05, delta=2, last_epoch=-1):
         self.alpha = alpha
         self.beta = beta
         self.toler = int(total_steps*tau)
         self.thres = lambd
-        self.decay = delta
+        self.delta = delta
         self.weight = 1
         self.count = 0
+        self.power = 0
         
         self.L_t = 0
         self.L_t_1 = 0
@@ -21,20 +129,9 @@ class MHLR(_LRScheduler):
         self.D_t_1 = 0
         self.D_EMA_t = 0
         self.D_EMA_t_1 = 0
-        # self.k1 = np.ones(self.m)
-        # self.k2 = np.ones(self.m)
-        # self.k2[int(self.m/2):] = -1
-        # self.ss = np.zeros(self.m)
-        # self.avg = []
-        # self.diff = []
-        # self.count = 0
-        # self.weight = 1
-        # self.w_count = 0
         super().__init__(optimizer, last_epoch=last_epoch)
     
     def my_step(self, loss):
-        # print(self.last_epoch)
-        # print(self._step_count)
         super().step()
         
         t = self.last_epoch - 1
@@ -55,61 +152,83 @@ class MHLR(_LRScheduler):
                 self.weight = 1
                 self.count += 1
             else:
-                self.weight = 1/self.decay
+                self.weight = 1/self.delta
                 self.count = 0
+                self.power += 1
+                
+            if self.power > 8:
+                self.weight = 1
+                # self.weight = self.delta**(self.power-1)
+                # self.power = 0
+        else:
+            self.weight = 1
+            self.count = 0
                 
         self.L_t_1 = self.L_t
         self.D_t_1 = self.D_t
         self.D_EMA_t_1 = self.D_EMA_t
         
-        # return self.weight
-        # if i < self.m:
-        #     self.ss[i] = loss
-        #     return
-        
-        # self.ss[:-1] = self.ss[1:]
-        # self.ss[-1] = loss
-        # self.avg.append(np.sum(self.ss*self.k1)/self.m)
-        
-        # if i < 2*self.m:
-        #     return
-        
-        # s_avg = self.avg[(i-2*self.m):(i-self.m)]
-        # self.diff.append(np.sum(s_avg*self.k2)/self.m)
-        
-        # if self.diff[-1] < 0.06:
-        #     self.count += 1
-            
-        #     if self.count > 2*self.m:
-        #         self.weight = 0.5
-        #         self.count = 0
-        #         self.w_count += 1
-        #     else:
-        #         self.weight = 1
-                
-        #     if self.w_count > 2:
-        #         self.weight = 4
-        #         self.w_count = 0
-        # else:
-        #     self.weight = 1
-        #     self.count = 0
-        #     self.w_count = 0
-        
-        
-        
-        
-        
-        
-    
     def get_lr(self):
-        # if self.last_epoch <= 2*self.m:
-        #     return [0, 0]
+        return [(group["lr"]*self.weight) for group in self.optimizer.param_groups]
+
+class MHLR(_LRScheduler):
+    def __init__(self, optimizer, total_steps, alpha=0.001, beta=0.001, lambd=5e-5, tau=0.05, delta=2, last_epoch=-1):
+        self.alpha = alpha
+        self.beta = beta
+        self.omega1 = 1 - alpha + 1 - beta
+        self.omega2 = (1-alpha) * (1-beta)
+        self.omega3 = alpha*beta
+        self.toler = int(total_steps*tau)
+        self.thres = lambd
+        self.delta = delta
+        self.weight = 1
+        self.count = 0
+        self.power = 0
         
-        # return [self.weight, self.weight]
+        self.L_t = 0
+        self.L_t_1 = 0
+        self.D_EMA_t = 0
+        self.D_EMA_t_1 = 0
+        self.D_EMA_t_2 = 0
+        super().__init__(optimizer, last_epoch=last_epoch)
+    
+    def my_step(self, loss):
+        super().step()
         
-        return [(group["lr"]* self.weight) for group in self.optimizer.param_groups]
+        t = self.last_epoch - 1
+        if t < 1:
+            self.L_t_1 = loss
+            return
         
+        self.L_t = loss
+        if t < 2:
+            self.D_EMA_t  = self.alpha*(self.L_t_1 - self.L_t)
+        else:
+            self.D_EMA_t = self.omega1*self.D_EMA_t_1 - self.omega2*self.D_EMA_t_2 + self.omega3*(self.L_t_1-self.L_t)
         
+        if self.D_EMA_t < self.thres:
+            if self.count < self.toler:
+                self.weight = 1
+                self.count += 1
+            else:
+                self.weight = 1/self.delta
+                self.count = 0
+                self.power += 1
+                
+            if self.power > 8:
+                self.weight = 1
+                # self.weight = self.delta**(self.power-1)
+                # self.power = 0
+        else:
+            self.weight = 1
+            self.count = 0
+                
+        self.D_EMA_t_2 = self.D_EMA_t_1
+        self.D_EMA_t_1 = self.D_EMA_t
+        self.L_t_1 = self.L_t
+        
+    def get_lr(self):
+        return [(group["lr"]*self.weight) for group in self.optimizer.param_groups]
 
 # class PolynomialLRWarmup(_LRScheduler):
 #     def __init__(self, optimizer, warmup_iters, total_iters=5, power=1.0, last_epoch=-1, verbose=False):
@@ -148,7 +267,6 @@ class MHLR(_LRScheduler):
 #                 )
 #                 for base_lr in self.base_lrs
 #             ]
-
     
 if __name__ == "__main__":
 
@@ -163,7 +281,7 @@ if __name__ == "__main__":
     test_module = TestModule()
     test_module_pfc = torch.nn.CrossEntropyLoss()
     lr_pfc_weight = 1 / 3
-    base_lr = 10
+    base_lr = 0.02
     
     sgd = SGD([
         {"params": test_module.parameters(), "lr": base_lr},
@@ -173,7 +291,7 @@ if __name__ == "__main__":
     x = []
     y = []
     y_pfc = []
-    losses = pd.read_csv("Output/WebFace12M_epoch5_r50/loss.csv")["loss"].values
+    losses = pd.read_csv("Output/wf12m_bs256_r50/loss.csv")["loss"].values
     total_steps = losses.shape[0]
     
     # scheduler = PolynomialLRWarmup(sgd, total_steps//10, total_steps, power=2)

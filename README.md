@@ -163,7 +163,7 @@ The folder of your test datasets should be organized like the follows:
 
 ## Pretrained models
 
-Too big to put it in supplementary materials. Instead, we put our training logs in the Performance section.
+Too big to upload it to Github. Instead, we put our training logs in the Performance section. Will upload the pretrained models to Baidu Netdisk and Google Drive in the future, since the anonymous submission regulations.
 
 ## Performance
 
