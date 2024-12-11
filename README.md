@@ -1,10 +1,10 @@
-# Moving Haar Learning Rate Scheduler for Large-scale Face Recognition Training with One GPU
+# FastFace: Fast-converging Scheduler for Large-scale Face Recognition Training with One GPU
 
-Moving Haar Learning Rate (MHLR) scheduler is a learning rate scheduler dedicated to large-scale face recognition training with 1xGPU. It is able to accelerate the model to 1/4 of its original training time without sacrificing more than 1% accuracy. For example, on the dataset WebFace12M containing more than 12M face images with 0.6M identities, MHLR only requires 30 hours to train the model ResNet100. With MHLR, scholars lacking expensive hardware resources and massive computing power can also do large-scale face recognition research now.
+FastFace is a learning rate scheduler dedicated to large-scale face recognition training with 1xGPU. It is able to accelerate the model to 1/4 of its original training time without sacrificing more than 1% accuracy. For example, on the dataset WebFace12M containing more than 12M face images with 0.6M identities, FastFace only requires 30 hours to train the model ResNet100. With FastFace, scholars lacking expensive hardware resources and massive computing power can also do large-scale face recognition research now.
 
 ## Acknowledgement
 
-We would like to express our sincere thanks to InsightFace<sup>1</sup>. MHLR is modified and developed based on arcface_pytorch<sup>2</sup> in InsightFace. Hereby, we advocate more people to develop such reproducible source code in order to stimulate more future works in the face recognition direction.
+We would like to express our sincere thanks to InsightFace<sup>1</sup>. FastFace is modified and developed based on arcface_pytorch<sup>2</sup> in InsightFace. Hereby, we advocate more people to develop such reproducible source code in order to stimulate more future works in the face recognition direction.
 
 <div id="insightface_paper"></div>
 
@@ -17,7 +17,7 @@ We would like to express our sincere thanks to InsightFace<sup>1</sup>. MHLR is 
 ## Some differences corresponding to arcface_pytorch
 
 - Arface_pytorch needs to install MXNet in order to read datasets from ".rec" files. The way to install the environment is in the document [`./utils/INSTALL_MXNET.md`](./utils/INSTALL_MXNET.md). However, it took us a long time to configure the developing environment. Thus, for simplicity and reproducibility, we converted the ".rec" files into ".jpg" images, though the huge amount of images will lead to that too many small files on the hard disk. In addition, the dataset WebFace42M contains ".jpg" images instead of ".rec" files. Therefore, we select ".jpg" images as our training data.
-- The implementation of arcface_pytorch aims at distributed training, while MHLR aims at single GPU training. Therefore, we mainly revised the multi-nodes with multi-GPUs code in arcface_pytorch to single GPU version in MHLR.
+- The implementation of arcface_pytorch aims at distributed training, while FastFace aims at single GPU training. Therefore, we mainly revised the multi-nodes with multi-GPUs code in arcface_pytorch to single GPU version in FastFace.
 
 ## Requirements
 
@@ -167,7 +167,7 @@ Too big to upload it to Github. Instead, we put our training logs in the Perform
 
 ## Performance
 
-| Datasets   | Backbone  | LFW   | CFP-FP | AgeDB-30 | IJB-B(1e-4) | IJB-B(1e-4) | log                                             |
+| Datasets   | Backbone  | LFW   | CFP-FP | AgeDB-30 | IJB-B(1e-4) | IJB-C(1e-4) | log                                             |
 |:-----------|:----------|:------|:-------|:---------|:------------|:------------|:------------------------------------------------|
 | MS1MV3     | ResNet100 | 99.80 | 98.53  | 98.12    | 95.03       | 96.41       | [click me](./Output/ms1mv3_epoch5_r100.txt)     |
 | WebFace4M  | ResNet100 | 99.65 | 98.63  | 97.57    | 94.36       | 96.18       | [click me](./Output/WebFace4M_epoch5_r100.txt)  |
