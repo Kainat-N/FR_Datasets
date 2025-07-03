@@ -1,3 +1,6 @@
+1. Update the __init__.py in the backbones folder after adding a new backbone
+2. Update config_reader.py in the configs folder after adding a new config file
+
 # FastFace: Fast-converging Scheduler for Large-scale Face Recognition Training with One GPU
 
 FastFace is a learning rate scheduler dedicated to large-scale face recognition training with 1xGPU. It is able to accelerate the model to 1/4 of its original training time without sacrificing more than 1% accuracy. For example, on the dataset WebFace12M containing more than 12M face images with 0.6M identities, FastFace only requires 30 hours to train the model ResNet100. With FastFace, scholars lacking expensive hardware resources and massive computing power can also do large-scale face recognition research now.

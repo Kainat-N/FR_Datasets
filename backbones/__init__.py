@@ -1,5 +1,6 @@
 from .iresnet import iresnet18, iresnet34, iresnet50, iresnet100, iresnet200
 from .mobilefacenet import get_mbf
+from .convnextv2_base import ConvNeXtBackbone
 
 
 def get_model(name, **kwargs):
@@ -14,6 +15,9 @@ def get_model(name, **kwargs):
         return iresnet100(False, **kwargs)
     elif name == "r200":
         return iresnet200(False, **kwargs)
+    
+    elif name == "convnextv2_base":
+        return ConvNeXtBackbone(**kwargs)
 
     elif name == "mbf":
         fp16 = kwargs.get("fp16", False)

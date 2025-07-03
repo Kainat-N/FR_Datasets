@@ -9,6 +9,9 @@ def get_config(file):
         from configs.webface8m import cfg
     elif file == "webface12m":
         from configs.webface12m import cfg
+    elif file == "convnextv2_ms1m_arcface":
+        print("Hello")
+        from configs.convnextv2_ms1m_arcface import cfg
     else:
         print("Config file loading failed.")
         return None
@@ -19,7 +22,7 @@ def get_config(file):
     return cfg()
 
 if __name__ == "__main__":
-    cfg = get_config("ms1mv3")
+    cfg = get_config("convnextv2_ms1m_arcface")
     
     for key in dir(cfg):
         if key.startswith("__"):
