@@ -6,7 +6,45 @@ import torch
 from torch import distributed
 from torch.nn.functional import linear, normalize
 
+class my_CE(torch.nn.Module):
+    def __init__(
+        self,
+        margin_loss: Callable,
+        embedding_size: int,
+        num_classes: int,
+        fp16: bool = False,
+    ):
+        super(my_CE, self).__init__()
+        self.cross_entropy = torch.nn.CrossEntropyLoss()
+        self.embedding_size = embedding_size
+        self.fp16 = fp16
+        self.weight = torch.nn.Parameter(torch.normal(0, 0.01, (num_classes, embedding_size)))
+        
+        # margin_loss
+        if isinstance(margin_loss, Callable):
+            self.margin_softmax = margin_loss
+        else:
+            raise
 
+    def forward(
+        self,
+        embeddings: torch.Tensor,
+        labels: torch.Tensor,
+    ):
+        weight = self.weight
+
+        with torch.cuda.amp.autocast(self.fp16):
+            norm_embeddings = normalize(embeddings)
+            norm_weight_activated = normalize(weight)
+            logits = linear(norm_embeddings, norm_weight_activated)
+        if self.fp16:
+            logits = logits.float()
+        logits = logits.clamp(-1, 1)
+
+        logits = self.margin_softmax(logits, labels)
+        loss = self.cross_entropy(logits, labels)
+        return loss
+    
 class PartialFC_V2(torch.nn.Module):
     """
     https://arxiv.org/abs/2203.15565
@@ -47,22 +85,11 @@ class PartialFC_V2(torch.nn.Module):
             The rate of negative centers participating in the calculation, default is 1.0.
         """
         super(PartialFC_V2, self).__init__()
-        # assert (
-        #     distributed.is_initialized()
-        # ), "must initialize distributed before create this"
-        # self.rank = distributed.get_rank()
-        # self.world_size = distributed.get_world_size()
-        
-        #~~~~~~~~~~~~Solution~~~~~~~~~~~~~~~~
-        if not distributed.is_initialized():
-            # Single GPU fallback - set rank/world_size to defaults
-            self.rank = 0
-            self.world_size = 1
-        else:
-            self.rank = distributed.get_rank()
-            self.world_size = distributed.get_world_size()
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+        assert (
+            distributed.is_initialized()
+        ), "must initialize distributed before create this"
+        self.rank = distributed.get_rank()
+        self.world_size = distributed.get_world_size()
 
         self.dist_cross_entropy = DistCrossEntropy()
         self.embedding_size = embedding_size
@@ -176,34 +203,6 @@ class PartialFC_V2(torch.nn.Module):
         logits = self.margin_softmax(logits, labels)
         loss = self.dist_cross_entropy(logits, labels)
         return loss
-
-
-class MyCE(torch.nn.Module):
-    def __init__(self, margin_loss, embedding_size, num_classes, sample_rate=1.0):
-        super(MyCE, self).__init__()
-        self.loss_fn = PartialFC_V2(
-            margin_loss=margin_loss,
-            embedding_size=embedding_size,
-            num_classes=num_classes,
-            sample_rate=sample_rate,
-            fp16=True,  # You can set this to True if using mixed precision
-        )
-
-    def forward(self, embeddings, labels):
-        return self.loss_fn(embeddings, labels)
-
-    def train(self, mode=True):
-        self.loss_fn.train(mode)
-        return super(MyCE, self).train(mode)
-
-    def parameters(self, recurse=True):
-        return self.loss_fn.parameters(recurse)
-
-# Alias for import
-my_CE = MyCE
-
-
-
 
 
 class DistCrossEntropyFunc(torch.autograd.Function):

@@ -41,8 +41,8 @@ class cfg:
     val = "E:/FAST/FR/datasets/lfw/lfw-deepfunneled"  # Optional: any val dataset (e.g. LFW)
 
     output = "output/convnextv2_ms1m"
-    num_classes =85561
-    num_image = 5822653
+    num_classes =93431
+    num_image = 5179511
     num_epoch = 10  # you can increase this later
     steps_per_epoch = num_image // batch_size
     total_step = steps_per_epoch * num_epoch

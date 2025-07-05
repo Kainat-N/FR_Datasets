@@ -37,18 +37,11 @@ class CombinedMarginLoss(torch.nn.Module):
                 tensor_mul = 1 - dirty
             logits = tensor_mul * logits
 
-        assert labels[index_positive].max().item() < logits.shape[1], \
-        f"Label index out of range. Max label: {labels[index_positive].max().item()}, but logits only have {logits.shape[1]} classes"
-
         target_logit = logits[index_positive, labels[index_positive].view(-1)]
-        print(f"logits shape: {logits.shape}")
-        print(f"labels max: {labels.max()}, min: {labels.min()}")
-        #target_logit = target_logit.clamp(-1.0 + 1e-7, 1.0 - 1e-7)  # <-- SAFETY CHECK
 
         if self.m1 == 1.0 and self.m3 == 0.0:
             with torch.no_grad():
-                # target_logit.arccos_()
-                target_logit.clamp_(-1.0 + 1e-7, 1.0 - 1e-7).arccos_()
+                target_logit.arccos_()
                 logits.arccos_()
                 final_target_logit = target_logit + self.m2
                 logits[index_positive, labels[index_positive].view(-1)] = final_target_logit

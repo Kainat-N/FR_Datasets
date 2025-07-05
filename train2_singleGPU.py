@@ -17,6 +17,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from logger import logger
 from configs.config_reader import get_config
+from torch.cuda.amp import GradScaler
 
 def setup_seed(seed, cuda_deterministic=True):
     torch.manual_seed(seed)
@@ -44,17 +45,22 @@ def main(config_file):
     
     # Image Folder
     transform = transforms.Compose([transforms.RandomHorizontalFlip(), transforms.ToTensor(), transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),])
+    
     train_set = ImageFolder(cfg.rec, transform)
     train_loader = DataLoader(dataset=train_set, batch_size=cfg.batch_size, shuffle=True, num_workers=cfg.num_workers, pin_memory=True, drop_last=True)
 
     backbone = get_model(cfg.network, dropout=0.0, fp16=cfg.fp16, num_features=cfg.embedding_size)
     backbone.train().cuda()
 
+
+   
     margin_loss = CombinedMarginLoss(64, cfg.margin_list[0], cfg.margin_list[1], cfg.margin_list[2], cfg.interclass_filtering_threshold)
     # margin_loss = CosFace()
     # margin_loss = NaiveFace()
     
-    CE_loss = my_CE(margin_loss, cfg.embedding_size, cfg.num_classes, False)
+    # print("Hello before CE_loss of train.py")
+    CE_loss = my_CE(margin_loss, cfg.embedding_size, cfg.num_classes, sample_rate=1.0)
+    #CE_loss = torch.nn.CrossEntropyLoss()
     CE_loss.train().cuda()
     
     opt = torch.optim.SGD(params=[{"params": backbone.parameters()}, {"params": CE_loss.parameters()}], lr=cfg.lr, momentum=0.9, weight_decay=cfg.weight_decay)
@@ -62,12 +68,27 @@ def main(config_file):
 
 
     global_step = 0
-    amp = torch.cuda.amp.grad_scaler.GradScaler(growth_interval=100)
+    amp = GradScaler(init_scale=2.**16, growth_interval=100)
     for epoch in range(0, cfg.num_epoch):
         for _, (img, local_labels) in enumerate(train_loader):
             global_step += 1
+
+            # print(f"Max label: {local_labels.max()}, Num classes: {cfg.num_classes}")
+            assert local_labels.max() < cfg.num_classes, \
+                f"Label {local_labels.max().item()} out of bounds for num_classes {cfg.num_classes}"
+            assert local_labels.min() >= 0, "Negative label found"
+            assert local_labels.dtype in [torch.int64, torch.long], \
+                f"Invalid label dtype: {local_labels.dtype}"
+           
+           
+            
             local_embeddings = backbone(img.to(device))
+
+            # Original code 
             loss: torch.Tensor = CE_loss(local_embeddings, local_labels.to(device))
+            # Chatgpt solution for the above line
+            # logits = margin_loss(local_embeddings, local_labels.to(device))
+            # loss = CE_loss(logits, local_labels.to(device))
 
             if cfg.fp16:
                 amp.scale(loss).backward()
